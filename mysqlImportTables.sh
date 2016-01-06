@@ -16,8 +16,10 @@ fi
 for T in $f; do
     file=$(basename $T)
     table=${file%.*}
-    echo "<<<<<  importing  $T into $d.$table  >>>>>  "
+    echo "<<<<<  importing  --- $d.$table  >>>>>  "
+    mysql -C --show-warnings -u root -h$h -p$p -e "SET GLOBAL foreign_key_checks=0"
     mysql -C --show-warnings -u root -h$h -p$p --force $d < "$T"
+    mysql -C --show-warnings -u root -h$h -p$p -e "SET GLOBAL foreign_key_checks=1"
 #    mysqlimport --use-threads=3 --debug-info -u root -h$h -p$p --force -ivL $d "$T"
     	#first need to create the tables so run the first statment from the file which is the CREATE TABLE
 #	sed '/INSERT/Q' $T | mysql -u root -h$h -p$p --force $d 
