@@ -17,6 +17,6 @@ fi
 mysql -u$u -p$p -N -B -e "show tables from $d"| grep -v information_schema |while read T;do
     echo "Backing up $f/$T"
     mkdir -p $f
-    mysqldump --skip-comments --compact -u$u -p$p $d "$T" > "$f/$T.sql"
+    mysqldump --skip-comments --compact --insert-ignore  -u$u -p$p $d "$T" > "$f/$T.sql"
 done;
 
