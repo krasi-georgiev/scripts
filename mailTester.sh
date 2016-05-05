@@ -1,7 +1,7 @@
 #!/bin/bash
 
-to=strestus@gmail.com
-from=team@vip-consult.co.uk
+to=web-f9viOT@mail-tester.com
+from=info@wentworthclinic.co.uk
 
 CURDATE=`date`
 sendmail -oi $to << EOF
