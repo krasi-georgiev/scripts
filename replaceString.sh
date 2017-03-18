@@ -13,6 +13,6 @@ fi
 
 for i in $folder/*; do
     echo "replacing $old->$new in $i"
-    sed -i -e "s/$old/$new/g" $i
+    sed -i -e "s/$old/$new/g" "$i"
 done
 
