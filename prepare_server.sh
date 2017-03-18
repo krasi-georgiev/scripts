@@ -5,7 +5,7 @@ rm "$DAILYLOGFILE"
 /bin/chown backuppc:backuppc "$DAILYLOGFILE"
 /bin/chmod 777 "$DAILYLOGFILE"
 
-EMAIL="support@vip-consult.co.uk"
+EMAIL="backups@vip-consult.solutions"
 
 HOST=$1
 BACKUP_DIR_MYSQL="$2/$1/$3"
@@ -13,16 +13,18 @@ BACKUP_DIR_PSQL="$4/$1/$5"
 CONTAINER_MYSQL=$3
 CONTAINER_PSQL=$5
 SSH_USER=$6
-run_message="Please run using /script_name host backup_dir_mysql mysql_container backup_dir_psql psql_container ssh_user"
+MYSQL_NETWORK=$7
+PSQL_NETWORK=$8
+run_message="Please run using /script_name host backup_dir_mysql mysql_container backup_dir_psql psql_container ssh_user mysql_network psql_network"
 
-if [ -z "$HOST" ] || [ -z "$BACKUP_DIR_MYSQL" ] || [ -z "$BACKUP_DIR_PSQL" ]|| [ -z "$CONTAINER_MYSQL" ]|| [ -z "$CONTAINER_PSQL" ] || [ -z "$SSH_USER" ]  ; then
+if [ -z "$HOST" ] || [ -z "$BACKUP_DIR_MYSQL" ] || [ -z "$BACKUP_DIR_PSQL" ]|| [ -z "$CONTAINER_MYSQL" ]|| [ -z "$CONTAINER_PSQL" ] || [ -z "$SSH_USER" ] || [ -z "$MYSQL_NETWORK" ] || [ -z "$PSQL_NETWORK" ]  ; then
         echo $run_message;
         exit
 fi
 
 echo -e "Starting Mysql Docker backup conatiner with BACKUP FOLDER:$BACKUP_DIR_MYSQL , CONTAINER:$CONTAINER_MYSQL , HOST: $HOST ! \n"
 /usr/bin/ssh  -x -l $SSH_USER $HOST \
-sudo docker run --rm --net compose \
+sudo docker run --rm --net $MYSQL_NETWORK \
 --cpu-shares 128 \
 -v /home/vipconsult/mysql/.my.cnf:/root/.my.cnf \
 -v $BACKUP_DIR_MYSQL:$BACKUP_DIR_MYSQL \
@@ -36,7 +38,7 @@ echo \n \n \n ".";
 
 echo -e "Starting Psql Docker backup conatiner with BACKUP FOLDER:$BACKUP_DIR_PSQL , CONATINER:$CONTAINER_PSQL , HOST: $HOST ! \n"
 /usr/bin/ssh  -x -l $SSH_USER $HOST \
-sudo docker run --rm --net compose \
+sudo docker run --rm --net $PSQL_NETWORK \
 --cpu-shares 128 \
 -v $BACKUP_DIR_PSQL:$BACKUP_DIR_PSQL \
 -e backup_dir=$BACKUP_DIR_PSQL \
@@ -46,7 +48,7 @@ sudo docker run --rm --net compose \
 
 
 if [ -s $DAILYLOGFILE ]; then    #email only if error occurred - because log file exists
-    cat "$DAILYLOGFILE" | /usr/bin/mail -s "Servers Backup Log" $EMAIL -aFrom:backuppc@vip-consult.co.uk
+    cat "$DAILYLOGFILE" | /sbin/bsmtp -f backuppc@vip-consult.co.uk -h smtp -s "Servers Backup Log" $EMAIL
 
     if [[ $? -ne 0 ]]; then
         echo -e "ERROR:  Error log  could not be emailed to you! \n";
@@ -54,4 +56,3 @@ if [ -s $DAILYLOGFILE ]; then    #email only if error occurred - because log fil
         echo -e "Backup Error log has been emailed to $EMAIL ! \n"
     fi
 fi
-
